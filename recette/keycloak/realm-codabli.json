@@ -1,0 +1,66 @@
+{
+  "realm": "codabli",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 3600,
+  "roles": {
+    "realm": [
+      { "name": "eleve", "description": "Élève" },
+      { "name": "enseignant", "description": "Enseignant" },
+      { "name": "parent", "description": "Parent" },
+      { "name": "professionnel_education", "description": "Professionnel de l'éducation" },
+      { "name": "moderateur", "description": "Modérateur" },
+      { "name": "admin", "description": "Administrateur" },
+      { "name": "super_admin", "description": "Super administrateur" },
+      { "name": "comite_lecture", "description": "Comité de lecture" },
+      { "name": "traducteur", "description": "Traducteur" },
+      { "name": "ambassadeur", "description": "Ambassadeur" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "codabli-backend",
+      "name": "Codabli Backend",
+      "description": "Client confidentiel utilisé par le backend Spring Boot (service account pour l'administration des utilisateurs + direct access grants pour /api/auth/login).",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "${KEYCLOAK_CLIENT_SECRET}",
+      "clientAuthenticatorType": "client-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "fullScopeAllowed": true,
+      "attributes": {
+        "post.logout.redirect.uris": "+"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-codabli-backend",
+      "enabled": true,
+      "serviceAccountClientId": "codabli-backend",
+      "clientRoles": {
+        "realm-management": ["realm-admin"]
+      }
+    },
+    {
+      "username": "admin@codabli.dev",
+      "email": "admin@codabli.dev",
+      "firstName": "Admin",
+      "lastName": "Codabli",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "Admin1234!", "temporary": false }
+      ],
+      "realmRoles": ["admin", "super_admin"]
+    }
+  ]
+}

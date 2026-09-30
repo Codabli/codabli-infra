@@ -1,0 +1,10 @@
+# Copier vers terraform.tfvars puis renseigner. NE PAS committer terraform.tfvars
+# (il est ignoré par .gitignore) : il peut contenir des identifiants de projet.
+
+service_name   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"      # ID du projet Public Cloud OVH
+region         = "GRA11"                                  # région FR (souveraineté)
+flavor_id      = "________-____-____-____-____________"   # UUID du flavor d2-8 (4 vCPU / 8 Go)
+image_id       = "________-____-____-____-____________"   # UUID de l'image Ubuntu 24.04
+instance_name  = "codabli-recette"
+billing_period = "hourly"                                # ou "monthly" une fois la recette stable
+ssh_public_key = "ssh-ed25519 AAAA... toi@poste"         # ta clé PUBLIQUE (pas la privée !)

@@ -1,0 +1,27 @@
+# Reverse-proxy de recette — V1 : HTTP sur l'IP (port 80), pas de TLS.
+#
+# Quand le sous-domaine existera, remplacer le bloc « :80 » par « recette.codabli.fr »
+# et retirer « auto_https off » : Caddy obtiendra alors un certificat Let's Encrypt
+# automatiquement (penser à ouvrir 443, déjà fait côté pare-feu).
+
+{
+	auto_https off
+	admin off
+}
+
+:80 {
+	# API backend (servie sous /api, pas de réécriture de chemin).
+	handle /api/* {
+		reverse_proxy backend:8082
+	}
+
+	# Keycloak (servi sous /auth).
+	handle /auth/* {
+		reverse_proxy keycloak:8080
+	}
+
+	# Tout le reste : le front (SPA Angular servie par nginx).
+	handle {
+		reverse_proxy front:80
+	}
+}

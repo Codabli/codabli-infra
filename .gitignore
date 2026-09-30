@@ -1,0 +1,22 @@
+# OpenTofu / Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+# Variables réelles (peuvent contenir des identifiants) — NE PAS committer.
+terraform.tfvars
+*.auto.tfvars
+override.tf
+override.tf.json
+
+# À committer, en revanche : .terraform.lock.hcl (fige les versions de providers).
+
+# Outils Python (venv local du script get_ovh_ids.py)
+.venv/
+__pycache__/
+
+# Secrets de la stack de recette
+recette/.env
+.env
+

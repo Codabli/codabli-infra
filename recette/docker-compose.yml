@@ -1,0 +1,108 @@
+# Stack de recette Codabli — V1 (IA hors périmètre).
+#
+# Front (Angular/nginx) + Backend (Spring Boot) + Keycloak (mode prod) +
+# PostgreSQL, le tout derrière Caddy sur le port 80 (HTTP sur IP pour la V1 ;
+# HTTPS s'activera via le sous-domaine plus tard).
+#
+# Un seul point d'entrée public (port 80 via Caddy), routage par chemin :
+#   /            -> front
+#   /api/*       -> backend (context-path /api)
+#   /auth/*      -> keycloak (relative path /auth)
+#
+# Premier déploiement manuel (sur la VM) :  docker compose up -d --build
+# Déploiement via CI (plus tard)         :  docker compose pull && docker compose up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Crée la base "keycloak" au premier init (voir initdb/).
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.2
+    restart: unless-stopped
+    command: ["start", "--import-realm"]
+    environment:
+      # --- Base de données ---
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # --- Hostname / reverse-proxy ---
+      # KC_HOSTNAME = base publique (sans /auth) ; le chemin /auth vient de KC_HTTP_RELATIVE_PATH.
+      # Issuer résultant : ${PUBLIC_URL}/auth/realms/codabli
+      KC_HOSTNAME: ${PUBLIC_URL}
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+      # --- Compte admin initial + secret injecté dans l'import du realm ---
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+    volumes:
+      - ./keycloak/realm-codabli.json:/opt/keycloak/data/import/realm-codabli.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ../../Codabli_Backend_
+    image: ${BACKEND_IMAGE:-ghcr.io/codabli/codabli-backend:recette}
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      # Le backend est servi sous /api (Caddy route /api/* ici sans réécrire).
+      SERVER_SERVLET_CONTEXT_PATH: /api
+      # Validation des jetons : iss = URL publique ; clés récupérées en interne
+      # (pas d'appel sortant au démarrage — Spring n'interroge pas la découverte
+      #  quand jwk-set-uri est fourni).
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${PUBLIC_URL}/auth/realms/codabli
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/codabli/protocol/openid-connect/certs
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  front:
+    build:
+      context: ../../codabli-frontend
+    image: ${FRONT_IMAGE:-ghcr.io/codabli/codabli-frontend:recette}
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - front
+      - backend
+      - keycloak
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
