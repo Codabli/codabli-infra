@@ -1,15 +1,16 @@
-# Reverse-proxy de recette — V1 : HTTP sur l'IP (port 80), pas de TLS.
+# Reverse-proxy de recette — HTTPS via Let's Encrypt sur recette.codabli.com.
 #
-# Quand le sous-domaine existera, remplacer le bloc « :80 » par « recette.codabli.fr »
-# et retirer « auto_https off » : Caddy obtiendra alors un certificat Let's Encrypt
-# automatiquement (penser à ouvrir 443, déjà fait côté pare-feu).
+# Caddy obtient et renouvelle le certificat automatiquement (ACME), termine le TLS,
+# et redirige http://:80 vers https://:443. Il faut 80 ET 443 ouverts côté pare-feu
+# OVH ET publiés par le service caddy du compose. Le challenge ACME HTTP-01 passe
+# par le 80 : ne pas le fermer.
 
 {
-	auto_https off
 	admin off
+	# email admin@codabli.com   # optionnel : notifications d'expiration Let's Encrypt
 }
 
-:80 {
+recette.codabli.com {
 	# API backend (servie sous /api, pas de réécriture de chemin).
 	handle /api/* {
 		reverse_proxy backend:8082

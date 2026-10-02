@@ -31,7 +31,7 @@ services:
       retries: 15
 
   keycloak:
-    image: quay.io/keycloak/keycloak:25.0.2
+    image: quay.io/keycloak/keycloak:26.8.0
     restart: unless-stopped
     command: ["start", "--import-realm"]
     environment:
@@ -41,9 +41,13 @@ services:
       KC_DB_USERNAME: ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
       # --- Hostname / reverse-proxy ---
-      # KC_HOSTNAME = base publique (sans /auth) ; le chemin /auth vient de KC_HTTP_RELATIVE_PATH.
-      # Issuer résultant : ${PUBLIC_URL}/auth/realms/codabli
-      KC_HOSTNAME: ${PUBLIC_URL}
+      # KC_HOSTNAME DOIT inclure le chemin /auth. En hostname v2 (Keycloak 26), les
+      # URL publiques (issuer, jwks_uri, endpoints OIDC) sont dérivées de KC_HOSTNAME
+      # et NON de KC_HTTP_RELATIVE_PATH. Sans /auth ici, l'issuer sortait en
+      # ${PUBLIC_URL}/realms/codabli (sans /auth) → mismatch avec l'issuer-uri du
+      # backend (401 systématique) et découverte OIDC pointant hors du routage Caddy.
+      # Issuer résultant attendu : ${PUBLIC_URL}/auth/realms/codabli
+      KC_HOSTNAME: ${PUBLIC_URL}/auth
       KC_HTTP_RELATIVE_PATH: /auth
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
@@ -93,6 +97,7 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
