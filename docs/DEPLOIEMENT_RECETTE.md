@@ -4,7 +4,10 @@
 > comment GitHub pousse automatiquement les images sur ce serveur.
 >
 > Environnement : `recette.codabli.com` (OVH Public Cloud, IP `51.178.223.90`).
-> Voir aussi le [journal de dev](../journal-dev.md) pour l'historique et les décisions.
+
+**📚 Dans ce repo :** [README](../README.md) (prérequis OVH, lancer Tofu) ·
+[TUTO_OPENTOFU](TUTO_OPENTOFU.md) (prise en main IaC) ·
+**DEPLOIEMENT_RECETTE** (ce fichier).
 
 ---
 
@@ -99,7 +102,7 @@ Au premier (et unique) boot, la VM :
 
 > ⚠️ **Ni l'IaC ni la CI ne clonent `codabli-infra` sur la VM.** Le `docker-compose.yml`
 > et le `Caddyfile` ont été copiés manuellement dans `~/codabli/codabli-infra/recette/`
-> (rsync/scp, cf. journal §10 et §13). La CI suppose ce répertoire déjà présent.
+> (rsync/scp). La CI suppose ce répertoire déjà présent.
 
 ---
 
@@ -207,13 +210,13 @@ flowchart LR
 | `VM_SSH_KEY` | **org**, selected | Clé **privée** de déploiement (la publique est dans `authorized_keys` de la VM). |
 
 - **Secrets d'organisation** (pas par repo) : définis une fois sur l'org, partagés aux
-  repos back + front → DRY. Possible car ces repos sont **publics** (cf. journal §12).
+  repos back + front → DRY. Possible car ces repos sont **publics**.
   ⚠️ Un secret de même nom **au niveau repo écrase** celui de l'org : laisser l'onglet
   Secrets des repos vide.
 - La VM doit être **loguée à GHCR** (`~/.docker/config.json`) pour tirer les images
-  privées du package — fait manuellement (journal §11).
+  privées du package — fait manuellement.
 
-> 🔧 **Deux pièges rencontrés au 1er run** (journal §12), utiles à connaître :
+> 🔧 **Deux pièges rencontrés au 1er run**, utiles à connaître :
 > 1. Secrets qui s'expansaient en chaîne vide → `ssh-keyscan -H ""` ; corrigé en
 >    (re)posant les secrets d'org.
 > 2. `error in libcrypto` → la clé privée avait été collée **sans les lignes
@@ -241,8 +244,7 @@ flowchart TD
   `BACKEND_IMAGE` / `FRONT_IMAGE` si besoin). `postgres`, `keycloak`, `caddy` viennent
   de leurs registres publics.
 - **Keycloak 26** (hostname v2) : `KC_HOSTNAME` **inclut `/auth`** pour que l'issuer
-  sorte en `https://recette.codabli.com/auth/realms/codabli` (sinon 401 côté backend —
-  cf. journal §10).
+  sorte en `https://recette.codabli.com/auth/realms/codabli` (sinon 401 côté backend).
 - `docker-compose.yml` et `Caddyfile` sont **gérés manuellement sur la VM** : la CI ne
   les synchronise pas (elle ne touche qu'aux images via `pull`/`up`).
 
@@ -278,6 +280,6 @@ ne fonctionne pas : il faut des **URLs GitHub complètes**.
   non versionné), mais la topologie est exposée. À re-trancher.
 - ⚠️ **Dérive possible** du `docker-compose.yml`/`Caddyfile` entre le repo et la VM,
   puisqu'ils y sont copiés à la main. Industrialisation prévue (VM qui `git pull` infra) :
-  « plus tard » (journal §11).
+  « plus tard ».
 - ℹ️ Le tag `:<sha>` est poussé mais **pas utilisé** par le `pull` (qui tire `:recette`).
   Il sert de point de rollback manuel.

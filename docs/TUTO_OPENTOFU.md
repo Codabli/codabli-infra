@@ -2,7 +2,7 @@
 
 Tuto d'introduction pour piloter l'infrastructure de recette Codabli en **IaC**.
 Aucune connaissance préalable de Terraform/OpenTofu requise. Les commandes
-concrètes du projet sont en section 6. Le code se trouve dans `tofu/`.
+concrètes du projet sont en section 6. Le code se trouve dans `../tofu/`.
 
 ---
 
@@ -96,7 +96,7 @@ export OVH_CONSUMER_KEY=...
 cd codabli-infra/tofu
 cp terraform.tfvars.example terraform.tfvars
 #   puis éditer terraform.tfvars : service_name, flavor_id, image_id, ssh_public_key
-#   (obtention des UUID flavor/image : voir README.md)
+#   (obtention des UUID flavor/image : voir ../README.md)
 
 # 3. Le cycle :
 tofu init      # doit se terminer par "OpenTofu has been successfully initialized!"
@@ -127,4 +127,8 @@ tofu destroy
 
 ---
 
-Voir aussi `README.md` (prérequis OVH, obtention des UUID, coûts, points de vigilance).
+## Voir aussi
+
+- **[README.md](../README.md)** — prérequis OVH, obtention des UUID, coûts, points de vigilance.
+- **[DEPLOIEMENT_RECETTE.md](DEPLOIEMENT_RECETTE.md)** — une fois la VM créée :
+  l'architecture complète et comment GitHub déploie automatiquement les images dessus.

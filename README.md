@@ -10,6 +10,17 @@ exposé en API). Le **sous-domaine** sera branché plus tard (DNS en IaC).
 
 ---
 
+## 📚 Documentation du repo
+
+- **README.md** (ce fichier) — prérequis OVH, obtention des UUID, lancer Tofu, coûts.
+- **[docs/TUTO_OPENTOFU.md](docs/TUTO_OPENTOFU.md)** — prise en main d'OpenTofu (concepts, state,
+  cycle `init/plan/apply/destroy`) pour qui débute en IaC.
+- **[docs/DEPLOIEMENT_RECETTE.md](docs/DEPLOIEMENT_RECETTE.md)** — architecture complète
+  avec schémas : construction du serveur, **pipeline CI/CD GitHub → GHCR → VM**, stack
+  Docker/Caddy, secrets.
+
+---
+
 ## Ce que fait ce code
 
 - Crée **une instance** OVH Public Cloud `d2-8` (4 vCPU / 8 Go), IP publique.
