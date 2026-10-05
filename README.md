@@ -21,7 +21,7 @@ le workflow GitHub Actions de déploiement, l'enregistrement DNS du sous-domaine
 
 ---
 
-## Prérequis (une fois, côté OVH — je ne peux pas le faire à ta place)
+## Prérequis (une fois, côté OVH, à faire à la mano)
 
 1. **Projet Public Cloud** : le créer dans le manager OVH si absent
    (Public Cloud > Create a project). Noter son **ID** → `service_name`.
