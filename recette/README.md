@@ -12,7 +12,7 @@ Un seul point d'entrée public : **Caddy sur le port 80**, routage par chemin :
 | Chemin    | Service        | Détail |
 |-----------|----------------|--------|
 | `/`       | front (nginx)  | SPA Angular statique |
-| `/api/*`  | backend:8082   | Spring Boot, servi sous le context-path `/api` |
+| `/api/*`  | backend:8082   | Spring Boot, contrôleurs déjà mappés sous `/api` |
 | `/auth/*` | keycloak:8080  | Keycloak en mode prod, relative path `/auth` |
 
 - **PostgreSQL** héberge deux bases : `codabli` (appli) et `keycloak` (créée à l'init).

@@ -233,7 +233,7 @@ termine le TLS (Let's Encrypt automatique sur `recette.codabli.com`).
 ```mermaid
 flowchart TD
     net["Internet<br/>https://recette.codabli.com"] --> caddy["Caddy :80/:443<br/>(TLS Let's Encrypt, 80→443)"]
-    caddy -- "/api/*" --> back["backend:8082<br/>(Spring Boot, context /api)"]
+    caddy -- "/api/*" --> back["backend:8082<br/>(Spring Boot, routes sous /api)"]
     caddy -- "/auth/*" --> kc["keycloak:8080<br/>(mode prod, /auth)"]
     caddy -- "/ (reste)" --> front["front:80<br/>(Angular/nginx)"]
     back --> pg["postgres:16<br/>(volume pgdata)"]

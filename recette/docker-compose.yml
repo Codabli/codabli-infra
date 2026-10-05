@@ -6,7 +6,7 @@
 #
 # Un seul point d'entrée public (port 80 via Caddy), routage par chemin :
 #   /            -> front
-#   /api/*       -> backend (context-path /api)
+#   /api/*       -> backend (les contrôleurs sont déjà mappés sous /api)
 #   /auth/*      -> keycloak (relative path /auth)
 #
 # Premier déploiement manuel (sur la VM) :  docker compose up -d --build
@@ -72,8 +72,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # Le backend est servi sous /api (Caddy route /api/* ici sans réécrire).
-      SERVER_SERVLET_CONTEXT_PATH: /api
+      # Pas de context-path : les contrôleurs du backend sont déjà mappés sous /api
+      # (Caddy route /api/* ici sans réécrire). Ajouter SERVER_SERVLET_CONTEXT_PATH=/api
+      # donnerait /api/api/... et ferait échouer les règles d'accès publiques (401).
       # Validation des jetons : iss = URL publique ; clés récupérées en interne
       # (pas d'appel sortant au démarrage — Spring n'interroge pas la découverte
       #  quand jwk-set-uri est fourni).
