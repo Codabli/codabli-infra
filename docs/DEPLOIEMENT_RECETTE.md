@@ -275,7 +275,7 @@ ne fonctionne pas : il faut des **URLs GitHub complètes**.
 - ⚠️ **VM facturée à l'existence** (hourly), pas à l'usage : seul `tofu destroy` arrête
   les frais — mais l'IP change, et le DNS `recette.codabli.com` pointe dessus. **Pas de
   `tofu destroy` sans rebascule DNS** (ou IP flottante OVH, toujours en attente).
-- ⚠️ **Repo `codabli-infra` public** (choix assumé §12) : compose, Caddyfile, realm et
+- ⚠️ **Repo `codabli-infra` public** (choix assumé) : compose, Caddyfile, realm et
   journal sont world-readable. Aucun secret en clair (ils sont dans le `.env` de la VM,
   non versionné), mais la topologie est exposée. À re-trancher.
 - ⚠️ **Dérive possible** du `docker-compose.yml`/`Caddyfile` entre le repo et la VM,
@@ -283,3 +283,11 @@ ne fonctionne pas : il faut des **URLs GitHub complètes**.
   « plus tard ».
 - ℹ️ Le tag `:<sha>` est poussé mais **pas utilisé** par le `pull` (qui tire `:recette`).
   Il sert de point de rollback manuel.
+
+---
+
+## Voir aussi
+
+- **[README.md](../README.md)** — prérequis OVH, obtention des UUID, lancer Tofu, coûts.
+- **[TUTO_OPENTOFU.md](TUTO_OPENTOFU.md)** — prise en main d'OpenTofu (concepts, state,
+  cycle `init/plan/apply/destroy`) pour qui débute en IaC.
