@@ -6,7 +6,8 @@ en **OpenTofu** (fork open source de Terraform). Décision d'hébergeur : voir
 
 Périmètre V1 : une instance qui accueillera **front + back + PostgreSQL + Keycloak**
 via Docker Compose. Le **service IA est hors périmètre** pour l'instant (pas encore
-exposé en API). Le **sous-domaine** sera branché plus tard (DNS en IaC).
+exposé en API). La recette est servie en HTTPS sur **`https://recette.codabli.com`** ;
+l'enregistrement DNS n'est pas encore géré par ce code.
 
 ---
 
@@ -21,14 +22,38 @@ exposé en API). Le **sous-domaine** sera branché plus tard (DNS en IaC).
 
 ---
 
-## Ce que fait ce code
+## Ce que contient le repo
 
-- Crée **une instance** OVH Public Cloud `d2-8` (4 vCPU / 8 Go), IP publique.
-- La bootstrappe via **cloud-init** : Docker + Docker Compose + pare-feu (22/80/443).
+**Le serveur** (`tofu/`, ce README) :
+- crée **une instance** OVH Public Cloud `d2-8` (4 vCPU / 8 Go), IP publique ;
+- la bootstrappe via **cloud-init** : Docker + Docker Compose + pare-feu (22/80/443).
 
-Ce qu'il ne fait **pas encore** (étapes suivantes) : le `docker-compose.yml` de
-recette, les Dockerfile (front nginx, backend), le reverse-proxy Caddy (HTTPS),
-le workflow GitHub Actions de déploiement, l'enregistrement DNS du sous-domaine.
+**Ce qui tourne dessus** (`recette/`, voir [recette/README.md](recette/README.md)) :
+- `docker-compose.yml` : front, backend, Keycloak, PostgreSQL et Caddy ;
+- `Caddyfile` : reverse-proxy HTTPS (certificat Let's Encrypt automatique) sur
+  `recette.codabli.com`, qui route `/api/*` vers le backend, `/auth/*` vers
+  Keycloak et le reste vers le front.
+
+**Le déploiement automatique** n'est pas dans ce repo : chaque repo applicatif a
+son workflow `.github/workflows/deploy-recette.yml` (front et backend). Un push sur
+`develop` construit l'image, la publie sur GHCR et relance le service sur la VM.
+Détails : [docs/DEPLOIEMENT_RECETTE.md](docs/DEPLOIEMENT_RECETTE.md).
+
+**Pas encore fait** : l'enregistrement DNS du sous-domaine en IaC (aucune
+ressource DNS dans `tofu/` pour l'instant).
+
+---
+
+## Installer OpenTofu
+
+- **Windows (PowerShell)** : `winget install OpenTofu.Tofu`, puis fermer et rouvrir
+  le terminal.
+- **Linux / WSL** : voir [docs/TUTO_OPENTOFU.md](docs/TUTO_OPENTOFU.md#5-installer-opentofu).
+
+Vérifier avec `tofu version`.
+
+> Les commandes de ce README sont écrites pour un terminal Linux / WSL. Les
+> équivalents **PowerShell** sont donnés juste en dessous quand la syntaxe change.
 
 ---
 
@@ -44,8 +69,17 @@ le workflow GitHub Actions de déploiement, l'enregistrement DNS du sous-domaine
    export OVH_APPLICATION_SECRET=...
    export OVH_CONSUMER_KEY=...
    ```
-3. **Clé SSH** : avoir une paire (`ssh-keygen -t ed25519`). On met la clé
-   **publique** dans `ssh_public_key`.
+   En PowerShell (valables seulement dans la fenêtre ouverte) :
+   ```powershell
+   $env:OVH_ENDPOINT = "ovh-eu"
+   $env:OVH_APPLICATION_KEY = "..."
+   $env:OVH_APPLICATION_SECRET = "..."
+   $env:OVH_CONSUMER_KEY = "..."
+   ```
+3. **Clé SSH** : avoir une paire (`ssh-keygen -t ed25519`, même commande sous
+   Windows). On met la clé **publique** dans `ssh_public_key`. Pour l'afficher :
+   `cat ~/.ssh/id_ed25519.pub`, ou en PowerShell
+   `Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub`.
 
 ### Obtenir les UUID `flavor_id` et `image_id`
 
@@ -67,6 +101,15 @@ Avec tes clés API exportées, tu peux les lister via l'API OVH
 ```sh
 cd tofu
 cp terraform.tfvars.example terraform.tfvars   # puis renseigner
+tofu init
+tofu plan
+tofu apply
+```
+
+En PowerShell, seule la copie change :
+```powershell
+cd tofu
+Copy-Item terraform.tfvars.example terraform.tfvars   # puis renseigner (notepad terraform.tfvars)
 tofu init
 tofu plan
 tofu apply

@@ -68,8 +68,16 @@ Le **`plan`** est le filet de sécurité : il liste chaque action avec un symbol
 
 ---
 
-## 5. Installer OpenTofu (WSL / Ubuntu)
+## 5. Installer OpenTofu
 
+**Windows (PowerShell)** :
+```powershell
+winget install OpenTofu.Tofu
+# fermer puis rouvrir le terminal (ou VS Code) pour que la commande soit trouvée
+tofu version   # vérifie l'installation
+```
+
+**WSL / Ubuntu** :
 ```sh
 curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
 chmod +x install-opentofu.sh
@@ -84,6 +92,10 @@ projet est compatible avec les deux ; on a retenu `tofu`.)
 ---
 
 ## 6. Le premier déploiement, pas à pas
+
+Les commandes ci-dessous sont pour un terminal Linux / WSL. **Sous Windows
+(PowerShell)**, seules deux syntaxes changent : `export` et `cp` (voir l'encadré
+juste après). `tofu`, `ssh` et `ssh-keygen` s'utilisent à l'identique.
 
 ```sh
 # 1. Les clés API OVH, dans le terminal courant (elles ne sont pas stockées dans le repo) :
@@ -102,6 +114,20 @@ cp terraform.tfvars.example terraform.tfvars
 tofu init      # doit se terminer par "OpenTofu has been successfully initialized!"
 tofu plan      # doit annoncer "Plan: 1 to add, 0 to change, 0 to destroy"
 tofu apply     # taper "yes" → OVH crée la machine (~1-2 min)
+```
+
+**Équivalent Windows (PowerShell)** pour les étapes 1 et 2 :
+```powershell
+# 1. Les clés API OVH (valables seulement dans cette fenêtre PowerShell) :
+$env:OVH_ENDPOINT = "ovh-eu"
+$env:OVH_APPLICATION_KEY = "..."
+$env:OVH_APPLICATION_SECRET = "..."
+$env:OVH_CONSUMER_KEY = "..."
+
+# 2. Les variables du projet :
+cd codabli-infra\tofu
+Copy-Item terraform.tfvars.example terraform.tfvars
+notepad terraform.tfvars
 ```
 
 Récupérer l'IP publique et se connecter :
