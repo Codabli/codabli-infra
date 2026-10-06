@@ -16,6 +16,19 @@ recette.codabli.com {
 		reverse_proxy backend:8082
 	}
 
+	# Swagger / OpenAPI — springdoc expose son UI et son JSON à la RACINE du
+	# backend (/swagger-ui/*, /swagger-ui.html, /v3/api-docs), HORS du préfixe
+	# /api. Ces routes sont donc indispensables : sans elles, Caddy enverrait ces
+	# chemins au front (200 = coquille Angular, pas Swagger) et l'URL historique
+	# /api/swagger-ui/* tomberait en 401. NE PAS supprimer en les prenant pour des
+	# exceptions arbitraires — elles reflètent où springdoc sert réellement l'UI.
+	# Le backend autorise déjà ces chemins (SecurityConfig : permitAll).
+	# URL : https://recette.codabli.com/swagger-ui/index.html
+	@swagger path /swagger-ui/* /swagger-ui.html /v3/api-docs*
+	handle @swagger {
+		reverse_proxy backend:8082
+	}
+
 	# Keycloak (servi sous /auth).
 	handle /auth/* {
 		reverse_proxy keycloak:8080
