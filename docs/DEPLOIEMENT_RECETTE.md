@@ -234,6 +234,7 @@ termine le TLS (Let's Encrypt automatique sur `recette.codabli.com`).
 flowchart TD
     net["Internet<br/>https://recette.codabli.com"] --> caddy["Caddy :80/:443<br/>(TLS Let's Encrypt, 80→443)"]
     caddy -- "/api/*" --> back["backend:8082<br/>(Spring Boot, routes sous /api)"]
+    caddy -- "/swagger-ui/*<br/>/v3/api-docs" --> back
     caddy -- "/auth/*" --> kc["keycloak:8080<br/>(mode prod, /auth)"]
     caddy -- "/ (reste)" --> front["front:80<br/>(Angular/nginx)"]
     back --> pg["postgres:16<br/>(volume pgdata)"]
@@ -245,6 +246,11 @@ flowchart TD
   de leurs registres publics.
 - **Keycloak 26** (hostname v2) : `KC_HOSTNAME` **inclut `/auth`** pour que l'issuer
   sorte en `https://recette.codabli.com/auth/realms/codabli` (sinon 401 côté backend).
+- **Swagger / OpenAPI** : UI sur <https://recette.codabli.com/swagger-ui/index.html>,
+  spec JSON sur `/v3/api-docs`. springdoc les sert **à la racine** du backend (hors
+  `/api`), d'où les routes Caddy dédiées `/swagger-ui/*` et `/v3/api-docs`. ⚠️ Ce n'est
+  **pas** `/api/swagger-ui/...` : cette ancienne URL ne marche plus depuis le retrait du
+  context-path `/api`.
 - `docker-compose.yml` et `Caddyfile` sont **gérés manuellement sur la VM** : la CI ne
   les synchronise pas (elle ne touche qu'aux images via `pull`/`up`).
 
