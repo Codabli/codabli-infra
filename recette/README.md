@@ -19,6 +19,7 @@ le HTTPS et sert au challenge Let's Encrypt), routage par chemin :
 |-----------|----------------|--------|
 | `/`       | front (nginx)  | SPA Angular statique |
 | `/api/*`  | backend:8082   | Spring Boot, contrôleurs déjà mappés sous `/api` |
+| `/swagger-ui/*`, `/v3/api-docs` | backend:8082 | Swagger UI + spec OpenAPI (springdoc, servis à la racine, hors `/api`) |
 | `/auth/*` | keycloak:8080  | Keycloak en mode prod, relative path `/auth` |
 
 - **PostgreSQL** héberge deux bases : `codabli` (appli) et `keycloak` (créée à l'init).
@@ -71,6 +72,7 @@ docker compose logs -f backend   # vérifier le démarrage Spring Boot
 - Front : `https://recette.codabli.com/`  → l'appli Angular s'affiche.
 - Keycloak : `https://recette.codabli.com/auth/`  → console d'admin (login = KEYCLOAK_ADMIN).
 - API : `https://recette.codabli.com/api/...`  → répond (401 sur les routes protégées, c'est normal).
+- Swagger : `https://recette.codabli.com/swagger-ui/index.html`  → doc interactive de l'API (spec JSON sur `/v3/api-docs`).
 
 ## Exploitation
 
